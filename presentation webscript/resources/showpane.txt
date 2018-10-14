@@ -1,0 +1,296 @@
+$(document).ready(function() {
+ $("#btn1").click(function() {
+        var tmp = Alfresco.constants.URL_SERVICECONTEXT;
+        var val = $(this).val();
+        $.ajax({
+            url: tmp + "modules/dashlet/index/config?htmlid="+ val,
+            success: function(result) { 
+                //alert( tmp + "modules/dashlet/index/config?htmlid="+ val);
+                $("#rightpane").html(result);
+                $("#btn2").click(function() {
+                    var tmp = Alfresco.constants.URL_SERVICECONTEXT;
+                    var val = $(this).val();
+               
+                    $.ajax({
+                        url: tmp + "modules/dashlet/modal/config?htmlid="+ val,
+                        success: function(result) {
+                            
+                            $("#createFTModal").html(result);
+                            getMultipleInstitution();
+                            $("#btn3").click(function(){
+                                createFundingType();
+                            });
+                           
+
+                        },
+                        error:function(){
+                            alert("error");
+                        }
+
+
+                    });
+                     
+
+                });
+
+                $("#search-btn").click(function(){
+                       // loadTableSkeleton();
+                    getFundingType();
+
+
+                });
+                $("#deleteButton").click(function(){
+                    deleteFundingType();
+                });
+
+            }
+
+        });
+        getInstitution();
+
+
+    });
+
+
+
+
+
+
+});
+  
+
+function getInstitution(){
+	var domainURI=getServerDomain();
+	$.ajax({
+            url: domainURI + "/alfresco/s/funds/getinstitution",
+            dataType: "json",
+            crossDomain: true,
+            beforeSend: function(request) {
+                request.setRequestHeader("Access-Control-Allow-Origin","*");
+            },
+            error: function(xmlRequest, submitFTTextStatus,
+                submitFTErrorThrown) {
+                alert("inside error" +
+                    JSON.stringify(xmlRequest, null, "\t"));
+                alert(submitFTTextStatus);
+                alert(submitFTErrorThrown);
+            },
+            success: function(ftData, ftStatus, ftObject) {
+                    var desig = JSON.stringify(ftData, null, "\t");
+                
+                    var selectBoxInnerHTML = ' <select class="form-control" id="inst-select" name="category" style="width:200px">';
+                    for (i = 0; i < ftData.Results.length; i++) {
+                        selectBoxInnerHTML += '<option value="' +
+                            ftData.Results[i].instCode + '">' +
+                            ftData.Results[i].instName + '</option>';
+                    }
+                    selectBoxInnerHTML += '</select>';
+                    document.getElementById("selectDiv").innerHTML = selectBoxInnerHTML;
+                
+
+
+
+            }
+            });
+
+}
+
+
+function deleteFundingType(){
+    var domainURI=getServerDomain();
+    var ftCode=[];
+    //var instCode;
+   // $.each($("#fundingTypeTable input:checked"),alert("hi"));
+    $.each($("#fundingTypeTable input:checked"), function(){
+        ftCode.push($(this).val());
+        
+    });
+    //instCode=$("#inst-select option:selected").val();
+    $.ajax({
+        url:domainURI + "/alfresco/s/funds/deletefundingtype",
+        dataType: "json",
+       // data:{ftCode:ftCode,instCode:instCode},
+       data:{ftCode:ftCode},
+        crossDomain:true,
+        beforeSend:function(request){
+            request.setRequestHeader("Access-Control-Allow-Origin","*");
+        },
+        error:function(ftRequest,ftStatus,ftError){
+                document.getElementById("status-label").style.display="inline-block";
+                document.getElementById("status-label").innerHTML="Error in Deletion";
+
+        },
+        success:function(ftData,ftStatus,ftObject){
+                document.getElementById("status-label").style.display="inline-block";
+                document.getElementById("status-label").innerHTML=ftData.status;
+                getFundingType();
+        }
+    });
+
+}
+
+function getFundingType(){
+    var domainURI=getServerDomain();
+    var selectedInst=$("#inst-select option:selected").val();
+    var content=false;
+    $.ajax({
+            url: domainURI + "/alfresco/s/funds/getfundingtype",
+            dataType:"json",
+            crossDomain:true,
+            data: {instCode:selectedInst},
+            beforeSend: function(request) {
+                request.setRequestHeader("Access-Control-Allow-Origin","*");
+            },
+            error: function(xmlRequest, submitFTTextStatus,
+                submitFTErrorThrown) {
+                alert("inside error" +
+                    JSON.stringify(xmlRequest, null, "\t"));
+                alert(submitFTTextStatus);
+                alert(submitFTErrorThrown);
+                document.getElementById("status-label").style.display="inline-block";
+                document.getElementById("status-label").innerHTML="Error in Loading Funding Types";
+            },
+            success:  function(ftData, ftStatus,ftObject){
+                document.getElementById("status-label").style.display="inline-block";
+                document.getElementById("status-label").innerHTML="No Available Funding Types";
+                document.getElementById("data").style.display="none";
+                
+                var row="";
+                var i;
+                for(i=0;i<ftData.Results.length;i++){
+                    row=row+'<tr><td class="col-xs-1"><input class="checkbox" type="checkbox" name="delete" value="';
+                    row=row+ftData.Results[i].fundCode;
+                    row=row+'"></td><td class="col-xs-3">';
+                    row=row+ftData.Results[i].fundName;
+                    row=row+'</td><td class="col-xs-6">';
+                    row=row+ftData.Results[i].fundDesc;
+                    row=row+'</td></tr>';
+                    content=true;
+                //alert(ftData.Results[0].fundName);
+                }
+                if(content){
+                    document.getElementById("status-label").innerHTML="Available Funding Types";
+                    document.getElementById("data").style.display="block";
+                }
+                $("#fundingTypeTable > tbody").html(row);
+
+            }
+
+    });
+
+}
+
+function getMultipleInstitution(){
+    var domainURI=getServerDomain();
+    $.ajax({
+            url: domainURI + "/alfresco/s/funds/getinstitution",
+            dataType: "json",
+            crossDomain: true,
+            beforeSend: function(request) {
+                request.setRequestHeader("Access-Control-Allow-Origin","*");
+            },
+            error: function(xmlRequest, submitFTTextStatus,
+                submitFTErrorThrown) {
+                alert("inside error" +
+                    JSON.stringify(xmlRequest, null, "\t"));
+                alert(submitFTTextStatus);
+                alert(submitFTErrorThrown);
+            },
+            success: function(ftData, ftStatus, ftObject) {
+                    var desig = JSON.stringify(ftData, null, "\t");
+                
+                    var selectBoxInnerHTML = '<select id="ms" multiple="multiple" name="f_inst" class="col-xs-12">';
+                    for (i = 0; i < ftData.Results.length; i++) {
+                        selectBoxInnerHTML += '<option value="' +
+                            ftData.Results[i].instCode + '">' +
+                            ftData.Results[i].instName + '</option>';
+                    }
+                    selectBoxInnerHTML += '</select>';
+                    document.getElementById("multiselectDiv").innerHTML = selectBoxInnerHTML;
+                
+
+
+
+}
+});
+
+}
+
+
+
+function createFundingType() {
+     document.getElementById("data").style.display="none";
+    var tmp = Alfresco.constants.PROXY_URI;
+    var ftCode = document.getElementById("modalform").elements["f_code"].value;
+    var ftName = document.getElementById("modalform").elements["f_name"].value;
+    var ftDesc = document.getElementById("modalform").elements["f_desc"].value;
+    
+    var domainURI = getServerDomain();
+    var urlContext = "/alfresco/s/funds/createfundingtype";
+    var selectedInst=[];
+    $.each($("#ms option:selected"), function(){
+        selectedInst.push($(this).val());
+        
+    });
+    
+    $.ajax({
+        url: domainURI + "/alfresco/s/funds/createfundingtype",
+        method : 'GET',
+        dataType: "json",
+        data: {ft_code:ftCode,ft_name:ftName,ft_desc:ftDesc,ft_inst:selectedInst},
+        crossDomain: true,
+        beforeSend: function(request) {
+            request.setRequestHeader("Access-Control-Allow-Origin", "*");
+        },
+        success: function(ftData, ftStatus,ftObject ){
+            //alert(JSON.stringify(ftData.Results[0].fundStatus,null,"\t"));
+            document.getElementById("status-label").style.display="inline-block";
+            document.getElementById("status-label").innerHTML=ftData.fundStatus;
+
+        
+        },
+         error: function(xmlRequest, submitFTTextStatus,
+                submitFTErrorThrown) {
+                alert("inside error" );
+                            document.getElementById("status-label").style.display="inline-block";
+            document.getElementById("status-label").innerHTML="Funding Type Creation failed";
+            }
+    });
+
+}
+
+
+function loadTableSkeleton(){
+                    var tmp = Alfresco.constants.URL_SERVICECONTEXT;
+                    var val = $("#search-btn").val();
+                    
+                    $.ajax({
+                        url: tmp + "modules/dashlet/table/config?htmlid="+ val,
+                        success: function(result) {
+
+                        $("#data").html(result);    
+                            
+                           
+                           
+
+                        },
+                        error:function(){
+                            alert("error in table");
+                        }
+
+
+                    });
+}
+
+
+
+function getServerDomain() {
+    var proxyURI = Alfresco.constants.PROXY_URI;
+    var protocol = proxyURI.substr(0, proxyURI.indexOf(':') + 1);
+    var temp1 = proxyURI.substr(protocol.length);
+    var domain = temp1.substr(0, temp1.indexOf(':') + 1);
+    var temp2 = temp1.substr(domain.length);                
+    var portnumber = temp2.substr(0, temp2.indexOf('/'));
+    var serverDomain = protocol + domain + portnumber;
+    return serverDomain;
+}

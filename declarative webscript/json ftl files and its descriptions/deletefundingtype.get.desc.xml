@@ -1,0 +1,7 @@
+<webscript>
+  <shortname>delete ft</shortname>
+  <description>delete funding type</description>
+  <url>/funds/deletefundingtype</url>
+  <authentication>none</authentication>
+  <format default="json">extension</format>
+</webscript>

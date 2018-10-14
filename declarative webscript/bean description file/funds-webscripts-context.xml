@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans>
+<bean id="webscript.funds.getinstitution.get" class="funds.GetInstitutionWebscript" parent="webscript"/>
+<bean id="webscript.funds.createfundingtype.get" class="funds.CreateFundingTypeWebscript" parent="webscript"/>
+<bean id="webscript.funds.getfundingtype.get" class="funds.GetFundingTypeWebscript" parent="webscript"/>
+<bean id="webscript.funds.deletefundingtype.get" class="funds.DeleteFundingType" parent="webscript"/>
+
+</beans>

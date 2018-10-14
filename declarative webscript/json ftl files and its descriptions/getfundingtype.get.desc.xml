@@ -1,0 +1,7 @@
+<webscript>
+  <shortname>Get Category</shortname>
+  <description>Return the Category</description>
+  <url>/funds/getfundingtype</url>
+  <authentication>none</authentication>
+  <format default="json">extension</format>
+</webscript>
